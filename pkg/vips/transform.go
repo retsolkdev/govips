@@ -309,15 +309,10 @@ func (t *Transform) Lossless() *Transform {
 	return t
 }
 
-// StripMetadata strips metadata from the image
+// StripMetadata strips ICC profile and metadata from the image
 func (t *Transform) StripMetadata() *Transform {
-	t.export.StripMetadata = true
-	return t
-}
-
-// StripProfile strips ICC profile from the image
-func (t *Transform) StripProfile() *Transform {
 	t.export.StripProfile = true
+	t.export.StripMetadata = true
 	return t
 }
 
@@ -508,19 +503,28 @@ func resize(bb *Blackboard) error {
 
 	cropMode := bb.ResizeStrategy == ResizeStrategyCrop
 	stretchMode := bb.ResizeStrategy == ResizeStrategyStretch
+	extractMode := bb.ResizeStrategy == ResizeStrategyExtract
 
 	if !stretchMode {
 		if shrinkX > 0 && shrinkY > 0 {
 			if cropMode {
 				shrinkX = math.Min(shrinkX, shrinkY)
 			} else {
-				shrinkX = math.Max(shrinkX, shrinkY)
+				if extractMode {
+					shrinkX = 1
+				} else {
+					shrinkX = math.Max(shrinkX, shrinkY)
+				}
 			}
 		} else {
 			if cropMode {
 				shrinkX = math.Min(shrinkX, shrinkY)
 			} else {
-				shrinkX = math.Max(shrinkX, shrinkY)
+				if extractMode {
+					shrinkX = 1
+				} else {
+					shrinkX = math.Max(shrinkX, shrinkY)
+				}
 			}
 		}
 		shrinkY = shrinkX
@@ -549,7 +553,32 @@ func resize(bb *Blackboard) error {
 		return err
 	}
 
+	if extractMode {
+		err := extractArea(bb)
+		return err
+	}
+
 	return nil
+}
+
+func extractArea(bb *Blackboard) error {
+
+	imageW, imageH := bb.Width(), bb.Height()
+	left, top := bb.cropOffsetX, bb.cropOffsetY
+	width, height := bb.targetWidth, bb.targetHeight
+
+	if left+width > imageW {
+		width = imageW - left
+		bb.targetWidth = width
+	}
+
+	if top+height > imageH {
+		height = imageH - top
+		bb.targetHeight = height
+	}
+  var err error
+	bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
+	return err
 }
 
 func maybeCrop(bb *Blackboard) error {
