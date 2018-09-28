@@ -567,6 +567,7 @@ func extractArea(bb *Blackboard) error {
 	if bb.ZoomX > 1 || bb.ZoomY > 1 {
 		bb.image, err = vipsZoom(bb.image, bb.ZoomX, bb.ZoomY)
 		bb.cropOffsetX, bb.cropOffsetY = bb.cropOffsetX * bb.ZoomX, bb.cropOffsetY * bb.ZoomY
+		bb.targetWidth, bb.targetHeight = bb.targetWidth / bb.ZoomX, bb.targetHeight / bb.ZoomY
 	}
 
 	imageW, imageH := bb.Width(), bb.Height()
