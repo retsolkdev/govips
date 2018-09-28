@@ -563,6 +563,12 @@ func resize(bb *Blackboard) error {
 
 func extractArea(bb *Blackboard) error {
 
+  var err error
+	if bb.ZoomX > 1 || bb.ZoomY > 1 {
+		bb.image, err = vipsZoom(bb.image, bb.ZoomX, bb.ZoomY)
+		bb.cropOffsetX, bb.cropOffsetY = bb.cropOffsetX * bb.ZoomX, bb.cropOffsetY * bb.ZoomY
+	}
+
 	imageW, imageH := bb.Width(), bb.Height()
 	left, top := bb.cropOffsetX, bb.cropOffsetY
 	width, height := bb.targetWidth, bb.targetHeight
@@ -576,11 +582,9 @@ func extractArea(bb *Blackboard) error {
 		height = imageH - top
 		bb.targetHeight = height
 	}
-  var err error
-	bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
 
-	if err != nil && (bb.ZoomX > 0 || bb.ZoomY > 0) {
-		bb.image, err = vipsZoom(bb.image, bb.ZoomX, bb.ZoomY)
+	if err != nil {
+		bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
 	}
 
 	return err
