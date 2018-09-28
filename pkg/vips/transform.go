@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
+	"strconv"
 )
 
 // InputParams are options when importing an image from file or buffer
@@ -573,6 +574,8 @@ func extractArea(bb *Blackboard) error {
 	imageW, imageH := bb.Width(), bb.Height()
 	left, top := bb.cropOffsetX, bb.cropOffsetY
 	width, height := bb.targetWidth, bb.targetHeight
+
+	println("valor width: "+strconv.Itoa(width)+ " height: " + strconv.Itoa(height))
 
 	if left+width > imageW {
 		width = imageW - left
