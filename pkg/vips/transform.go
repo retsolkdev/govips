@@ -578,20 +578,22 @@ func extractArea(bb *Blackboard) error {
 	}
 
 	var err error
-	if err != nil {
-		bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
-	}
-
-	if bb.ZoomX > 0 || bb.ZoomY > 0 {
+	if bb.ZoomX > 0 && bb.ZoomY > 0{
 		bb.image, err = vipsZoom(bb.image, bb.ZoomX, bb.ZoomY)
-		//left, top = bb.cropOffsetX * bb.ZoomX, bb.cropOffsetY * bb.ZoomY
+		left, top = bb.cropOffsetX * bb.ZoomX, bb.cropOffsetY * bb.ZoomY
 		//println("valor left: "+strconv.Itoa(left)+ " top: " + strconv.Itoa(top))
-		//width, height = width / bb.ZoomX, height / bb.ZoomY
+		width, height = width / bb.ZoomX, height / bb.ZoomY
 		//println("valor width: "+strconv.Itoa(width)+ " bb.height: " + strconv.Itoa(bb.height))
 
 		//if err != nil {
 		//	bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
 		//}
+	} else {
+		err = nil
+	}
+
+	if err == nil {
+		bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
 	}
 
 	return err
