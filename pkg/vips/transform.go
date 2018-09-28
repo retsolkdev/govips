@@ -578,6 +578,11 @@ func extractArea(bb *Blackboard) error {
 	}
   var err error
 	bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
+
+	if err != nil && (bb.ZoomX > 0 || bb.ZoomY > 0) {
+		bb.image, err = vipsZoom(bb.image, bb.ZoomX, bb.ZoomY)
+	}
+
 	return err
 }
 
