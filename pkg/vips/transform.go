@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
-	"strconv"
 )
 
 // InputParams are options when importing an image from file or buffer
@@ -564,18 +563,9 @@ func resize(bb *Blackboard) error {
 
 func extractArea(bb *Blackboard) error {
 
-  var err error
-	if bb.ZoomX > 1 || bb.ZoomY > 1 {
-		bb.image, err = vipsZoom(bb.image, bb.ZoomX, bb.ZoomY)
-		bb.cropOffsetX, bb.cropOffsetY = bb.cropOffsetX * bb.ZoomX, bb.cropOffsetY * bb.ZoomY
-		bb.targetWidth, bb.targetHeight = bb.targetWidth / bb.ZoomX, bb.targetHeight / bb.ZoomY
-	}
-
 	imageW, imageH := bb.Width(), bb.Height()
 	left, top := bb.cropOffsetX, bb.cropOffsetY
 	width, height := bb.targetWidth, bb.targetHeight
-
-	println("valor width: "+strconv.Itoa(width)+ " height: " + strconv.Itoa(height))
 
 	if left+width > imageW {
 		width = imageW - left
@@ -587,8 +577,21 @@ func extractArea(bb *Blackboard) error {
 		bb.targetHeight = height
 	}
 
+	var err error
 	if err != nil {
 		bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
+	}
+
+	if bb.ZoomX > 0 || bb.ZoomY > 0 {
+		bb.image, err = vipsZoom(bb.image, bb.ZoomX, bb.ZoomY)
+		//left, top = bb.cropOffsetX * bb.ZoomX, bb.cropOffsetY * bb.ZoomY
+		//println("valor left: "+strconv.Itoa(left)+ " top: " + strconv.Itoa(top))
+		//width, height = width / bb.ZoomX, height / bb.ZoomY
+		//println("valor width: "+strconv.Itoa(width)+ " bb.height: " + strconv.Itoa(bb.height))
+
+		//if err != nil {
+		//	bb.image, err = vipsExtractArea(bb.image, left, top, width, height)
+		//}
 	}
 
 	return err
