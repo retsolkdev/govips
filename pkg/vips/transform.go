@@ -503,14 +503,14 @@ func resize(bb *Blackboard) error {
 
 	cropMode := bb.ResizeStrategy == ResizeStrategyCrop
 	stretchMode := bb.ResizeStrategy == ResizeStrategyStretch
-	extractMode := bb.ResizeStrategy == ResizeStrategyExtract
+	zoomMode := bb.ResizeStrategy == ResizeStrategyZoom
 
 	if !stretchMode {
 		if shrinkX > 0 && shrinkY > 0 {
 			if cropMode {
 				shrinkX = math.Min(shrinkX, shrinkY)
 			} else {
-				if extractMode {
+				if zoomMode {
 					shrinkX = 1
 				} else {
 					shrinkX = math.Max(shrinkX, shrinkY)
@@ -520,7 +520,7 @@ func resize(bb *Blackboard) error {
 			if cropMode {
 				shrinkX = math.Min(shrinkX, shrinkY)
 			} else {
-				if extractMode {
+				if zoomMode {
 					shrinkX = 1
 				} else {
 					shrinkX = math.Max(shrinkX, shrinkY)
@@ -553,15 +553,15 @@ func resize(bb *Blackboard) error {
 		return err
 	}
 
-	if extractMode {
-		err := extractArea(bb)
+	if zoomMode {
+		err := zoomArea(bb)
 		return err
 	}
 
 	return nil
 }
 
-func extractArea(bb *Blackboard) error {
+func zoomArea(bb *Blackboard) error {
 
 	imageW, imageH := bb.Width(), bb.Height()
 	left, top := bb.cropOffsetX, bb.cropOffsetY
